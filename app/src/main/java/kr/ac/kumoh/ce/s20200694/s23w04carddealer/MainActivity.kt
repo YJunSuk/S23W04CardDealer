@@ -3,26 +3,35 @@ package kr.ac.kumoh.ce.s20200694.s23w04carddealer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import kr.ac.kumoh.ce.s20200694.s23w04carddealer.databinding.ActivityMainBinding
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     private lateinit var main:ActivityMainBinding
+    private lateinit var model:CardDealerViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_main)
 
         main = ActivityMainBinding.inflate(layoutInflater)
         setContentView(main.root)
-
-        var c = Random.nextInt(52)
-        Log.i("Test", "$c: ${getCardName(c)}")
-
-        val res = resources.getIdentifier(// TODO: 하드 코딩 제거할 것
-        getCardName(c),
-            "drawable",
-            packageName)
-        main.imgCard1.setImageResource(res)
+        model = ViewModelProvider(this)[CardDealerViewModel::class.java]
+        model.cards.observe(this, Observer {
+            val res = IntArray(5)
+            for(i in res.indices){
+                res[i] = resources.getIdentifier(
+                    getCardName(it[i]),
+                    "drawable",
+                    packageName
+                )
+            }
+            main.imgCard1.setImageResource(res[0])
+        })
+        main.btnShuffle.setOnClickListener {
+            model.shuffle()
+        }
     }
 
     private fun getCardName(c: Int): String {
